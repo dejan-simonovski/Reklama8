@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.reklama8.service.ListingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,7 @@ class ListingController {
     private ListingService listingService;
 
     @GetMapping
+//    @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<JsonNode> getAllListings() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
