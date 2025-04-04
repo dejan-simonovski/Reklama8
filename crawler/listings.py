@@ -1,4 +1,5 @@
 import json
+import random
 import requests
 from bs4 import BeautifulSoup
 
@@ -44,7 +45,7 @@ def scrape_pazar3(page_number):
                 "image": img_elem.get("data-src", img_elem.get("src", "")),
                 "link": SOURCES[0]["base_url"] + title_elem["href"],
                 "time": time_elem.text.strip() if time_elem else "Unknown",
-                "source": "pazar3",
+                "source": "Pazar3",
             })
     return listings, bool(listings)
 
@@ -88,7 +89,7 @@ def scrape_reklama5(page_number):
                 "image": img_url,
                 "link": SOURCES[1]["base_url"] + title_elem["href"],
                 "time": " ".join(time_text.split()),
-                "source": "reklama5"
+                "source": "Reklama5"
             })
     return listings, bool(soup.find("a", title="Следна"))
 
@@ -110,6 +111,8 @@ if __name__ == "__main__":
     results = scrape_multiple_pages(scrape_pazar3, SCRAPE_LIMIT) + scrape_multiple_pages(scrape_reklama5, SCRAPE_LIMIT)
 
     print(f"Total listings scraped: {len(results)}")
+
+    random.shuffle(results) # Shuffle
 
     with open("listings.json", "w", encoding="utf-8", errors="replace") as file:
         json.dump(results, file, ensure_ascii=False, indent=4)
