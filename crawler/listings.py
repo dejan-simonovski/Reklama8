@@ -33,6 +33,7 @@ def scrape_pazar3(page_number):
         location_elem = ad.find_all("a", class_="link-html nobold")[-1]
         img_elem = ad.find("img", class_="ProductionImg")
         category_elem = ad.find("a", class_="link-html5 nobold")
+        time_elem = ad.find("span", class_="pull-right ci-text-right")
 
         if title_elem and price_elem and location_elem and img_elem:
             listings.append({
@@ -42,7 +43,8 @@ def scrape_pazar3(page_number):
                 "category": category_elem.text.strip() if category_elem else "Unknown",
                 "image": img_elem.get("data-src", img_elem.get("src", "")),
                 "link": SOURCES[0]["base_url"] + title_elem["href"],
-                "source": "pazar3"
+                "time": time_elem.text.strip() if time_elem else "Unknown",
+                "source": "pazar3",
             })
     return listings, bool(listings)
 
@@ -63,6 +65,15 @@ def scrape_reklama5(page_number):
         location_elem = ad.find("span", class_="city-span")
         img_elem = ad.find_previous("div", class_="ad-image")
         category_elem = ad.find("a", class_="text-secondary")
+        time_elem = ad.find_next("div", class_="ad-date-div-1")
+        if time_elem:
+            time_text = " ".join(time_elem.stripped_strings)
+        else:
+            time_text = "Unknown"
+        if price_elem:
+            price_text = " ".join(price_elem.stripped_strings)
+        else:
+            price_text = "Unknown"
 
         if title_elem and price_elem and location_elem and img_elem:
             img_url = img_elem["style"].split("url(")[1].split(")")[0]
@@ -71,11 +82,12 @@ def scrape_reklama5(page_number):
 
             listings.append({
                 "title": title_elem.text.strip(),
-                "price": price_elem.text.strip(),
+                "price": " ".join(price_text.split()),
                 "location": location_elem.text.strip(),
                 "category": category_elem.text.strip() if category_elem else "Unknown",
                 "image": img_url,
                 "link": SOURCES[1]["base_url"] + title_elem["href"],
+                "time": " ".join(time_text.split()),
                 "source": "reklama5"
             })
     return listings, bool(soup.find("a", title="Следна"))
