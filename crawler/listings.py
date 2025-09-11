@@ -33,7 +33,7 @@ def scrape_pazar3(page_number):
         price_elem = ad.find("p", class_="list-price")
         location_elem = ad.find_all("a", class_="link-html nobold")[-1]
         img_elem = ad.find("img", class_="ProductionImg")
-        category_elem = ad.find("a", class_="link-html5 nobold")
+        category_elem = ad.find("a", class_="link-html nobold")
         time_elem = ad.find("span", class_="pull-right ci-text-right")
 
         if title_elem and price_elem and location_elem and img_elem:
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     print(f"Total listings scraped: {len(results)}")
 
-    random.shuffle(results) # Shuffle
+   # random.shuffle(results) # Shuffle
 
     with open("listings.json", "w", encoding="utf-8", errors="replace") as file:
         json.dump(results, file, ensure_ascii=False, indent=4)
