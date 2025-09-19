@@ -31,7 +31,9 @@ class ListingController {
 
     @GetMapping
     public ResponseEntity<JsonNode> getListings(
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int pageSize
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -49,9 +51,20 @@ class ListingController {
                 }
             }
 
+            int total = filtered.size();
+
+            // 🟢 Pagination math
+            int fromIndex = Math.max(0, (page - 1) * pageSize);
+            int toIndex = Math.min(fromIndex + pageSize, total);
+
+            ArrayNode paginated = objectMapper.createArrayNode();
+            for (int i = fromIndex; i < toIndex; i++) {
+                paginated.add(filtered.get(i));
+            }
+
             var response = objectMapper.createObjectNode();
-            response.set("data", filtered);
-            response.put("total", filtered.size());
+            response.set("data", paginated);
+            response.put("total", total);
 
             return ResponseEntity.ok(response);
 

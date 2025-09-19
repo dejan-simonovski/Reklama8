@@ -1,5 +1,4 @@
 package mk.reklama8.service;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +32,7 @@ public class ListingService {
             saveListings(listings);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error parsing listings");
+//            System.out.println("Error parsing listings");
         }
     }
 
@@ -44,7 +43,7 @@ public class ListingService {
 
     public String fetchRawJson() {
         try {
-            System.out.println("Current Working Directory: " + new java.io.File(".").getAbsolutePath());
+//            System.out.println("Current Working Directory: " + new java.io.File(".").getAbsolutePath());
             byte[] jsonData = Files.readAllBytes(Paths.get("crawler/listings.json"));
 
             ObjectMapper objectMapper = new ObjectMapper();

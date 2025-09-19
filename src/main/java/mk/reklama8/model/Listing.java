@@ -1,7 +1,9 @@
 package mk.reklama8.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 public class Listing {
     @Id
