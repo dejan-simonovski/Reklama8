@@ -2,6 +2,35 @@ import json
 import random
 import requests
 from bs4 import BeautifulSoup
+import unicodedata
+import re
+
+# Mapping common Latin letters that appear in Cyrillic text
+LATIN_TO_CYRILLIC = {
+    "j": "ј",
+    "s": "с",
+    "e": "е",
+    "a": "а",
+    "o": "о",
+    "i": "и",
+    "k": "к",
+    "x": "х",
+    "c": "с",
+    "y": "у",
+    "p": "р",
+    "b": "в",
+    "m": "м",
+    "t": "т",
+    "n": "п",
+}
+
+def normalize_city_name(name):
+    if not name:
+        return ""
+    name = unicodedata.normalize("NFKC", name)
+    name = re.sub(r"\s+", " ", name).strip().lower()
+    name = "".join(LATIN_TO_CYRILLIC.get(ch, ch) for ch in name)
+    return name
 
 # Constants
 SOURCES = [
@@ -17,6 +46,19 @@ SOURCES = [
     },
 ]
 
+resp = requests.get("http://localhost:8080/listings/locations")
+
+try:
+    cities = resp.json()
+except json.JSONDecodeError:
+    cities = json.loads(resp.text)
+
+if isinstance(cities, str):
+    cities = json.loads(cities)
+
+city_names = {c["cyrillic"] for c in cities}
+
+city_names_norm = {normalize_city_name(c) for c in city_names}
 
 def scrape_pazar3(page_number):
     print(f"Scraping page {page_number} on pazar3...")
@@ -31,16 +73,36 @@ def scrape_pazar3(page_number):
     for ad in soup.find_all("div", class_="new row row-listing"):
         title_elem = ad.find("a", class_="Link_vis")
         price_elem = ad.find("p", class_="list-price")
-        location_elem = ad.find_all("a", class_="link-html nobold")[-1]
+        location_links = ad.find_all("a", class_="link-html nobold")
+
+        city = ""
+        subcity = ""
+
+        if location_links:
+            last_text = location_links[-1].text.strip()
+            second_last_text = location_links[-2].text.strip() if len(location_links) >= 2 else ""
+
+            last_text_norm = normalize_city_name(last_text)
+            second_last_text_norm = normalize_city_name(second_last_text)
+
+            if second_last_text_norm in city_names_norm and second_last_text_norm != last_text_norm:
+                city = second_last_text
+                subcity = last_text
+            else:
+                city = last_text
+
+
+        location = f"{subcity} / {city}" if subcity else city
+
         img_elem = ad.find("img", class_="ProductionImg")
         category_elem = ad.find("a", class_="link-html nobold")
         time_elem = ad.find("span", class_="pull-right ci-text-right")
 
-        if title_elem and price_elem and location_elem and img_elem:
+        if title_elem and price_elem and location and img_elem:
             listings.append({
                 "title": title_elem.text.strip(),
                 "price": price_elem.text.strip().replace("\n", " "),
-                "location": location_elem.text.strip(),
+                "location": location,
                 "category": category_elem.text.strip() if category_elem else "Unknown",
                 "image": img_elem.get("data-src", img_elem.get("src", "")),
                 "link": SOURCES[0]["base_url"] + title_elem["href"],

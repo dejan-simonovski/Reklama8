@@ -1,9 +1,10 @@
-package mk.reklama8.service;
+package mk.reklama8.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.reklama8.model.Listing;
 import mk.reklama8.repository.ListingRepository;
+import mk.reklama8.service.IListingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @Service
-public class ListingService {
+public class ListingService implements IListingService {
     @Autowired
     private ListingRepository repository;
 
@@ -36,12 +37,12 @@ public class ListingService {
         }
     }
 
-    private List<Listing> parseListings() throws IOException {
+    public List<Listing> parseListings() throws IOException {
         String content = new String(Files.readAllBytes(Paths.get("crawler/listings.json")), StandardCharsets.UTF_8);
         return new ObjectMapper().readValue(content, new TypeReference<>() {});
     }
 
-    public String fetchRawJson() {
+    public String fetchListingsJson() {
         try {
 //            System.out.println("Current Working Directory: " + new java.io.File(".").getAbsolutePath());
             byte[] jsonData = Files.readAllBytes(Paths.get("crawler/listings.json"));
@@ -52,6 +53,20 @@ public class ListingService {
         } catch (IOException e) {
             e.printStackTrace();
             return "{\"error\": \"Could not read JSON file\"}";
+        }
+    }
+
+    @Override
+    public String fetchLocations() {
+        try {
+            byte[] jsonData = Files.readAllBytes(Paths.get("locations/locations.json"));
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonData);
+            return objectMapper.writeValueAsString(jsonNode);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "{\"error\": \"Could not read locations.json\"}";
         }
     }
 
