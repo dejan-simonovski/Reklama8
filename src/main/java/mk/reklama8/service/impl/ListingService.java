@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,10 +25,12 @@ public class ListingService implements IListingService {
         repository.saveAll(listings);
     }
 
-    @Scheduled(fixedRate = 14400000) // Every 4 hours 14400000
+    @Scheduled(fixedDelay = 14400000) // Every 4 hours 14400000
     public void fetchAndSaveListings() {
         try {
-            Process process = new ProcessBuilder("python", "crawler/listings.py").start();
+            Process process = new ProcessBuilder("python", "listings.py")
+                    .directory(new File("crawler"))
+                    .start();
             process.waitFor();
             List<Listing> listings = parseListings();
             saveListings(listings);
@@ -43,8 +46,13 @@ public class ListingService implements IListingService {
     }
 
     public String fetchListingsJson() {
+
+        if (!Files.exists(Paths.get("crawler/listings.json"))) {
+            System.out.println("listings.json not found, fetching...");
+            fetchAndSaveListings();
+        }
+
         try {
-//            System.out.println("Current Working Directory: " + new java.io.File(".").getAbsolutePath());
             byte[] jsonData = Files.readAllBytes(Paths.get("crawler/listings.json"));
 
             ObjectMapper objectMapper = new ObjectMapper();

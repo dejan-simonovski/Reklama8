@@ -4,8 +4,10 @@ import mk.reklama8.model.User;
 import mk.reklama8.repository.UserRepository;
 import mk.reklama8.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,15 @@ public class AuthController {
     PasswordEncoder encoder;
     @Autowired
     JwtUtil jwtUtils;
+
+    @GetMapping("/check")
+    public ResponseEntity<String> checkAuth(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        return ResponseEntity.ok("OK");
+    }
+
     @PostMapping("/signin")
     public Map<String, String> authenticateUser(@RequestBody User user) {
 
