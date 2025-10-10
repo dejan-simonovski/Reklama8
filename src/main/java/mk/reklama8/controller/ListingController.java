@@ -94,7 +94,7 @@ class ListingController {
         }
 
         notificationService.subscribe(userDetails.getUsername(), search, location);
-        return ResponseEntity.ok("Notification subscription saved");
+        return ResponseEntity.ok("Notification subscribed successfully. You will be notified if a similar listing appears within 30 days. ");
     }
 
     @GetMapping("/locations")
