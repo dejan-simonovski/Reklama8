@@ -29,9 +29,9 @@ public class ListingService implements IListingService {
     @Autowired
     private EmailService emailService;
 
-    public void saveListings(List<Listing> listings) {
-        repository.saveAll(listings);
-    }
+//    public void saveListings(List<Listing> listings) {
+//        repository.saveAll(listings);
+//    }
 
     @Scheduled(fixedDelay = 14400000) // Every 4 hours 14400000
     public void fetchAndSaveListings() {
@@ -41,7 +41,7 @@ public class ListingService implements IListingService {
                     .start();
             process.waitFor();
             List<Listing> listings = parseListings();
-            saveListings(listings);
+            //saveListings(listings);
 
             processNotifications(listings);
         } catch (Exception e) {

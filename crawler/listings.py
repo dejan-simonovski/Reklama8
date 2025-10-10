@@ -131,6 +131,9 @@ def scrape_reklama5(page_number):
             time_text = " ".join(time_elem.stripped_strings)
         else:
             time_text = "Unknown"
+
+        time_text = re.sub(r"\b(Промовирано|НОВ ОГЛАС)\b", "", time_text, flags=re.IGNORECASE).strip()
+
         if price_elem:
             price_text = " ".join(price_elem.stripped_strings)
         else:
@@ -148,7 +151,7 @@ def scrape_reklama5(page_number):
                 "category": category_elem.text.strip() if category_elem else "Unknown",
                 "image": img_url,
                 "link": SOURCES[1]["base_url"] + title_elem["href"],
-                "time": " ".join(time_text.split()),
+                "time": time_text,
                 "source": "Reklama5"
             })
     return listings, bool(soup.find("a", title="Следна"))
