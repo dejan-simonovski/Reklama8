@@ -52,7 +52,7 @@ public class WebSecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/test/user").authenticated()
+                                .requestMatchers("/listings/notify").authenticated()
                                 .anyRequest().permitAll()
                 );
 

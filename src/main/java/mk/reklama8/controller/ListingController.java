@@ -3,9 +3,13 @@ package mk.reklama8.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import mk.reklama8.model.User;
 import mk.reklama8.service.impl.ListingService;
+import mk.reklama8.service.impl.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
@@ -14,6 +18,8 @@ import java.io.IOException;
 class ListingController {
     @Autowired
     private ListingService listingService;
+    @Autowired
+    private NotificationService notificationService;
 
 //    @GetMapping
 ////    @CrossOrigin(origins = "http://localhost:4200")
@@ -75,6 +81,20 @@ class ListingController {
             return ResponseEntity.internalServerError()
                     .body(new ObjectMapper().createObjectNode().put("error", "Could not parse JSON"));
         }
+    }
+
+    @PostMapping("/notify")
+    public ResponseEntity<String> notifyMe(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String location
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("Unauthorized: Please log in");
+        }
+
+        notificationService.subscribe(userDetails.getUsername(), search, location);
+        return ResponseEntity.ok("Notification subscription saved");
     }
 
     @GetMapping("/locations")
