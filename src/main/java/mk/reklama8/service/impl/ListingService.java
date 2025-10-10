@@ -3,9 +3,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.reklama8.model.Listing;
+import mk.reklama8.model.NotificationSubscription;
 import mk.reklama8.repository.ListingRepository;
+import mk.reklama8.repository.NotificationRepository;
 import mk.reklama8.service.IListingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +17,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class ListingService implements IListingService {
     @Autowired
     private ListingRepository repository;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private EmailService emailService;
 
     public void saveListings(List<Listing> listings) {
         repository.saveAll(listings);
@@ -34,6 +42,8 @@ public class ListingService implements IListingService {
             process.waitFor();
             List<Listing> listings = parseListings();
             saveListings(listings);
+
+            processNotifications(listings);
         } catch (Exception e) {
             e.printStackTrace();
 //            System.out.println("Error parsing listings");
@@ -75,6 +85,50 @@ public class ListingService implements IListingService {
         } catch (IOException e) {
             e.printStackTrace();
             return "{\"error\": \"Could not read locations.json\"}";
+        }
+    }
+
+    private void processNotifications(List<Listing> listings) {
+        List<NotificationSubscription> subscriptions = notificationRepository.findAll();
+
+        for (NotificationSubscription sub : subscriptions) {
+            String search = sub.getSearchQuery();
+            String location = sub.getLocation();
+
+            if (search == null || search.isBlank())
+                continue;
+
+            boolean matched = listings.stream().anyMatch(listing -> {
+                boolean matchesSearch = listing.getTitle() != null &&
+                        listing.getTitle().toLowerCase().contains(search.toLowerCase());
+
+                boolean matchesLocation = location == null || location.isBlank() ||
+                        (listing.getLocation() != null &&
+                                listing.getLocation().toLowerCase().contains(location.toLowerCase()));
+
+                return matchesSearch && matchesLocation;
+            });
+
+            boolean expired = sub.getCreatedAt().isBefore(LocalDateTime.now().minusDays(30));
+
+            if (matched) {
+                listings.stream()
+                        .filter(listing -> {
+                            boolean matchesSearch = listing.getTitle() != null &&
+                                    listing.getTitle().toLowerCase().contains(search.toLowerCase());
+
+                            boolean matchesLocation = location == null || location.isBlank() ||
+                                    (listing.getLocation() != null &&
+                                            listing.getLocation().toLowerCase().contains(location.toLowerCase()));
+
+                            return matchesSearch && matchesLocation;
+                        })
+                        .forEach(listing -> emailService.sendEmail(sub.getUserId(), listing));
+            }
+
+            if (matched || expired) {
+                notificationRepository.delete(sub);
+            }
         }
     }
 
