@@ -8,20 +8,14 @@ import re
 # Mapping common Latin letters that appear in Cyrillic text
 LATIN_TO_CYRILLIC = {
     "j": "ј",
-    "s": "с",
     "e": "е",
     "a": "а",
     "o": "о",
-    "i": "и",
     "k": "к",
     "x": "х",
-    "c": "с",
     "y": "у",
-    "p": "р",
-    "b": "в",
     "m": "м",
     "t": "т",
-    "n": "п",
 }
 
 def normalize_city_name(name):
@@ -30,6 +24,10 @@ def normalize_city_name(name):
     name = unicodedata.normalize("NFKC", name)
     name = re.sub(r"\s+", " ", name).strip().lower()
     name = "".join(LATIN_TO_CYRILLIC.get(ch, ch) for ch in name)
+
+    words = name.split(" ")
+    name = " ".join(w.capitalize() for w in words)
+
     return name
 
 # Constants
@@ -91,8 +89,8 @@ def scrape_pazar3(page_number):
             else:
                 city = last_text
 
-
-        location = f"{subcity} / {city}" if subcity else city
+        location_raw = f"{subcity} / {city}" if subcity else city
+        location = normalize_city_name(location_raw)
 
         img_elem = ad.find("img", class_="ProductionImg")
         category_elem = ad.find("a", class_="link-html nobold")

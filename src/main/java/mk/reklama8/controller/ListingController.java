@@ -46,7 +46,7 @@ class ListingController {
                             (item.has("title") && item.get("title").asText().toLowerCase().contains(search.toLowerCase()));
 
                     boolean matchesCity = (location == null || location.isBlank()) ||
-                            (item.has("location") && item.get("location").asText().equalsIgnoreCase(location));
+                            (item.has("location") && item.get("location").asText().toLowerCase().contains(location.toLowerCase()));
 
                     if (matchesSearch && matchesCity) {
                         filtered.add(item);
@@ -92,6 +92,4 @@ class ListingController {
                     .body(new ObjectMapper().createObjectNode().put("error", "Could not load locations.json"));
         }
     }
-
-
 }
