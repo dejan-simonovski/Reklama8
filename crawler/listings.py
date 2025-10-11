@@ -177,7 +177,7 @@ if __name__ == "__main__":
 
    # random.shuffle(results) # Shuffle
 
-    # with open("listings.json", "w", encoding="utf-8", errors="replace") as file:
-    #     json.dump(results, file, ensure_ascii=False, indent=4)
+    with open("listings.json", "w", encoding="utf-8", errors="replace") as file:
+        json.dump(results, file, ensure_ascii=False, indent=4)
 
     print("Results saved to 'listings.json'")
