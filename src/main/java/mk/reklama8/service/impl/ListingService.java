@@ -2,6 +2,7 @@ package mk.reklama8.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import mk.reklama8.model.Listing;
 import mk.reklama8.model.NotificationSubscription;
 import mk.reklama8.repository.ListingRepository;
@@ -42,7 +43,7 @@ public class ListingService implements IListingService {
             process.waitFor();
             List<Listing> listings = parseListings();
             //saveListings(listings);
-
+            System.out.println("Task completed successfully at: " + java.time.LocalDateTime.now());
             processNotifications(listings);
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,7 +124,13 @@ public class ListingService implements IListingService {
 
                             return matchesSearch && matchesLocation;
                         })
-                        .forEach(listing -> emailService.sendEmail(sub.getUserId(), listing));
+                        .forEach(listing -> {
+                            try {
+                                emailService.sendEmail(sub.getUserId(), listing);
+                            } catch (MessagingException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
             }
 
             if (matched || expired) {

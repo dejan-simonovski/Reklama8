@@ -59,7 +59,6 @@ public class AuthController {
 
     @PostMapping("/signup")
     public Map<String, String> registerUser(@RequestBody User user) {
-        System.out.println(user);
 
         if (!user.getUsername().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             return Map.of("error", "Username must be a valid email!");

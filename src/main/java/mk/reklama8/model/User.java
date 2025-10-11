@@ -17,4 +17,10 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+
+    @Override
+    public String toString() {
+        return "User(id=" + id + ", username=" + username + ")";
+    }
+
 }
