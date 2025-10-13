@@ -66,7 +66,7 @@ public class AuthController {
         if (userRepository.existsByUsername(user.getUsername())) {
             return Map.of("error", "Username is already taken!");
         }
-        User newUser = new User(null, user.getUsername(), encoder.encode(user.getPassword()));
+        User newUser = new User(user.getUsername(), encoder.encode(user.getPassword()));
         userRepository.save(newUser);
 
         return Map.of("message", "User registered successfully!");

@@ -17,20 +17,4 @@ public class Listing {
     private String link;
     private String time;
     private String source;
-
-    public Listing(Long id, String title, String price, String location, String category, String image, String link, String time, String source) {
-        this.id = id;
-        this.title = title;
-        this.price = price;
-        this.location = location;
-        this.category = category;
-        this.image = image;
-        this.link = link;
-        this.time = time;
-        this.source = source;
-    }
-
-    public Listing() {
-
-    }
 }

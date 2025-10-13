@@ -1,20 +1,22 @@
 package mk.reklama8.model;
 
+import mk.reklama8.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(name = "notification_subscriptions")
 public class NotificationSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_username", referencedColumnName = "username", nullable = false)
+    private User user;
 
     private String searchQuery;
     private String location;
@@ -22,9 +24,4 @@ public class NotificationSubscription {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
-    }
 }

@@ -9,7 +9,6 @@ import mk.reklama8.repository.ListingRepository;
 import mk.reklama8.repository.NotificationRepository;
 import mk.reklama8.service.IListingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -96,47 +95,34 @@ public class ListingService implements IListingService {
             String search = sub.getSearchQuery();
             String location = sub.getLocation();
 
-            if (search == null || search.isBlank())
-                continue;
+            if (search == null || search.isBlank()) continue;
 
-            boolean matched = listings.stream().anyMatch(listing -> {
-                boolean matchesSearch = listing.getTitle() != null &&
-                        listing.getTitle().toLowerCase().contains(search.toLowerCase());
-
-                boolean matchesLocation = location == null || location.isBlank() ||
-                        (listing.getLocation() != null &&
-                                listing.getLocation().toLowerCase().contains(location.toLowerCase()));
-
-                return matchesSearch && matchesLocation;
-            });
+            List<Listing> matchedListings = listings.stream()
+                    .filter(listing -> {
+                        boolean matchesSearch = listing.getTitle() != null &&
+                                listing.getTitle().toLowerCase().contains(search.toLowerCase());
+                        boolean matchesLocation = location == null || location.isBlank() ||
+                                (listing.getLocation() != null &&
+                                        listing.getLocation().toLowerCase().contains(location.toLowerCase()));
+                        return matchesSearch && matchesLocation;
+                    })
+                    .toList();
 
             boolean expired = sub.getCreatedAt().isBefore(LocalDateTime.now().minusDays(30));
 
-            if (matched) {
-                listings.stream()
-                        .filter(listing -> {
-                            boolean matchesSearch = listing.getTitle() != null &&
-                                    listing.getTitle().toLowerCase().contains(search.toLowerCase());
-
-                            boolean matchesLocation = location == null || location.isBlank() ||
-                                    (listing.getLocation() != null &&
-                                            listing.getLocation().toLowerCase().contains(location.toLowerCase()));
-
-                            return matchesSearch && matchesLocation;
-                        })
-                        .forEach(listing -> {
-                            try {
-                                emailService.sendEmail(sub.getUserId(), listing);
-                            } catch (MessagingException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
+            if (!matchedListings.isEmpty()) {
+                matchedListings.forEach(listing -> {
+                    try {
+                        emailService.sendEmail(sub.getUser().getUsername(), listing);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
 
-            if (matched || expired) {
+            if (!matchedListings.isEmpty() || expired) {
                 notificationRepository.delete(sub);
             }
         }
     }
-
 }

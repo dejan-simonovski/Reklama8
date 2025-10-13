@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import mk.reklama8.model.User;
+import mk.reklama8.repository.UserRepository;
 import mk.reklama8.service.impl.ListingService;
 import mk.reklama8.service.impl.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ class ListingController {
     private ListingService listingService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private UserRepository userRepository;
 
 //    @GetMapping
 ////    @CrossOrigin(origins = "http://localhost:4200")
@@ -93,7 +96,8 @@ class ListingController {
             return ResponseEntity.status(401).body("Unauthorized: Please log in");
         }
 
-        notificationService.subscribe(userDetails.getUsername(), search, location);
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        notificationService.subscribe(user, search, location);
         return ResponseEntity.ok("Notification subscribed successfully. You will be notified if a similar listing appears within 30 days. ");
     }
 

@@ -14,9 +14,9 @@ public class NotificationService implements INotificationService {
         this.repo = repo;
     }
 
-    public NotificationSubscription subscribe(String user, String searchQuery, String location) {
+    public NotificationSubscription subscribe(User user, String searchQuery, String location) {
         NotificationSubscription sub = new NotificationSubscription();
-        sub.setUserId(user);
+        sub.setUser(user);
         sub.setSearchQuery(searchQuery);
         sub.setLocation(location);
         return repo.save(sub);
