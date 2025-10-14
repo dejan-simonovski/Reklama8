@@ -170,7 +170,7 @@ def scrape_multiple_pages(scrape_func, limit=5):
 
 
 if __name__ == "__main__":
-    SCRAPE_LIMIT = 5 # Number of pages to scrape from each site
+    SCRAPE_LIMIT = 20 # Number of pages to scrape from each site
     results = scrape_multiple_pages(scrape_pazar3, SCRAPE_LIMIT) + scrape_multiple_pages(scrape_reklama5, SCRAPE_LIMIT)
 
     print(f"Total listings scraped: {len(results)}")

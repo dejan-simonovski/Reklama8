@@ -42,7 +42,7 @@ public class ListingService implements IListingService {
             process.waitFor();
             List<Listing> listings = parseListings();
             //saveListings(listings);
-            System.out.println("Task completed successfully at: " + java.time.LocalDateTime.now());
+            //System.out.println("Task completed successfully at: " + java.time.LocalDateTime.now());
             processNotifications(listings);
         } catch (Exception e) {
             e.printStackTrace();
