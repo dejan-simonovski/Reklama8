@@ -1,4 +1,4 @@
-![**Reklama8**](https://raw.githubusercontent.com/dejan-simonovski/Reklama8/refs/heads/main/assets/logo.png?token=GHSAT0AAAAAAC74HVIA43AM55WM3OVK5S4KZ7LUESQ)
+![**Reklama8**](https://github.com/dejan-simonovski/Reklama8/blob/main/assets/logo.png)
 
 ## **Overview**
 **Reklama8 - The Smart Marketplace Ad Aggregator** is a web application that collects listings from multiple online platforms, specifically **Reklama5** and **Pazar3**, and consolidates them into a single user-friendly interface. Built with **Spring Boot** and **Angular**, this application allows users to log in, specify their desired ads, and get notified via email when matching listings become available.
